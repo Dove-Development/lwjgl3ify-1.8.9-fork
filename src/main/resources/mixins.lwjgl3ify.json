@@ -1,8 +1,29 @@
 {
   "required": true,
-  "minVersion": "0.8.3-GTNH",
-  "package": "me.eigenraven.lwjgl3ify.mixins",
+  "minVersion": "0.7.11",
+  "package": "me.eigenraven.lwjgl3ify.mixins.early",
+  "plugin": "me.eigenraven.lwjgl3ify.mixins.Lwjgl3ifyMixinPlugin",
   "refmap": "mixins.lwjgl3ify.refmap.json",
-  "target": "@env(DEFAULT)",
-  "compatibilityLevel": "JAVA_8"
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "fml.ItemStackHolderRef",
+    "fml.JarDiscoverer",
+    "fml.ObjectHolderRef",
+    "fml.ObjectHolderRegistry"
+  ],
+  "client": [
+    "game.MixinEntityRenderer",
+    "game.MixinGuiEditSign",
+    "game.MixinGuiScreen",
+    "game.MixinGuiScreenBook",
+    "game.MixinGuiTextField",
+    "game.MixinMinecraft_Display",
+    "game.MixinMouseHelper",
+    "game.MixinStitcher",
+    "game.MixinTextureAtlasSprite",
+    "game.MixinTextureMap",
+    "game.openurl.MixinGuiMainMenu",
+    "game.openurl.MixinGuiScreenDemoResourcePacks",
+    "game.openurl.MixinGuiStreamUnavailable"
+  ]
 }

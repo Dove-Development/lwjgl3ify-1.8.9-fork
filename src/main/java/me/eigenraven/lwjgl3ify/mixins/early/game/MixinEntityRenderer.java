@@ -1,15 +1,13 @@
 package me.eigenraven.lwjgl3ify.mixins.early.game;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.renderer.EntityRenderer;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-
-import com.llamalad7.mixinextras.expression.Definition;
-import com.llamalad7.mixinextras.expression.Expression;
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
 import me.eigenraven.lwjgl3ify.api.FloatMouseHelper;
 
@@ -19,17 +17,19 @@ public class MixinEntityRenderer {
     @Shadow
     private Minecraft mc;
 
-    @Definition(id = "intX", field = "Lnet/minecraft/util/MouseHelper;deltaX:I")
-    @Expression("(float)?.intX")
-    @ModifyExpressionValue(method = "updateCameraAndRender", at = @At("MIXINEXTRAS:EXPRESSION"))
-    float useFloatingX(float original) {
-        return ((FloatMouseHelper) this.mc.mouseHelper).lwjgl3ify$getFloatDX();
-    }
-
-    @Definition(id = "intY", field = "Lnet/minecraft/util/MouseHelper;deltaY:I")
-    @Expression("(float)?.intY")
-    @ModifyExpressionValue(method = "updateCameraAndRender", at = @At("MIXINEXTRAS:EXPRESSION"))
-    float useFloatingY(float original) {
-        return ((FloatMouseHelper) this.mc.mouseHelper).lwjgl3ify$getFloatDY();
+    /**
+     * Turn the camera by the sub-pixel mouse delta SDL reports instead of the whole-pixel one in MouseHelper. The
+     * second setAngles call in updateCameraAndRender is the non-smooth-camera branch, which applies the raw delta.
+     */
+    @Redirect(
+        method = "updateCameraAndRender",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/entity/EntityPlayerSP;setAngles(FF)V", ordinal = 1),
+        require = 0)
+    private void lwjgl3ify$useFloatingMouseDelta(EntityPlayerSP player, float yaw, float pitch) {
+        final FloatMouseHelper helper = (FloatMouseHelper) this.mc.mouseHelper;
+        final float sensitivity = this.mc.gameSettings.mouseSensitivity * 0.6F + 0.2F;
+        final float factor = sensitivity * sensitivity * sensitivity * 8.0F;
+        final float invert = this.mc.gameSettings.invertMouse ? -1.0F : 1.0F;
+        player.setAngles(helper.lwjgl3ify$getFloatDX() * factor, helper.lwjgl3ify$getFloatDY() * factor * invert);
     }
 }

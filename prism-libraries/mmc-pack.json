@@ -16,10 +16,10 @@
                     "uid": "org.lwjgl3"
                 }
             ],
-            "cachedVersion": "1.7.10",
+            "cachedVersion": "1.8.9",
             "important": true,
             "uid": "net.minecraft",
-            "version": "1.7.10"
+            "version": "1.8.9"
         },
         {
             "cachedName": "LWJGL3ify Early Classpath",
@@ -30,13 +30,13 @@
             "cachedName": "Forge-LWJGL3",
             "cachedRequires": [
                 {
-                    "equals": "1.7.10",
+                    "equals": "1.8.9",
                     "uid": "net.minecraft"
                 }
             ],
-            "cachedVersion": "10.13.4.1614",
+            "cachedVersion": "11.15.1.2318",
             "uid": "net.minecraftforge",
-            "version": "10.13.4.1614"
+            "version": "11.15.1.2318"
         },
         {
             "cachedName": "LWJGL3ify launch args",

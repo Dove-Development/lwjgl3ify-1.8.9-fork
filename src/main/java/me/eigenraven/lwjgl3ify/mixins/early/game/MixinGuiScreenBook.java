@@ -17,7 +17,13 @@ import me.eigenraven.lwjgl3ify.client.TextFieldHandler;
 public class MixinGuiScreenBook implements InputEvents.KeyboardListener {
 
     @Shadow
-    private void func_146459_b(String p_146459_1_) {}
+    private boolean bookIsUnsigned;
+
+    @Shadow
+    private boolean bookGettingSigned;
+
+    @Shadow
+    private void pageInsertIntoCurrent(String text) {}
 
     @Inject(method = "initGui", at = @At("HEAD"))
     private void lwjgl3ify$onOpen(CallbackInfo ci) {
@@ -33,17 +39,20 @@ public class MixinGuiScreenBook implements InputEvents.KeyboardListener {
         method = "keyTypedInBook",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ChatAllowedCharacters;isAllowedCharacter(C)Z"))
     private boolean lwjgl3ify$denyStandardTextInput(char character) {
-        // Inject queued IME text input
+        // Text arrives through onTextEvent (SDL text input, IME-aware) instead
         return false;
     }
 
     @Override
     public void onTextEvent(InputEvents.TextEvent event) {
-        final String toAppend = event.text;
+        // Only the page body goes through SDL text input; the title field while signing keeps vanilla handling.
+        if (!bookIsUnsigned || bookGettingSigned) {
+            return;
+        }
         if (!event.text.chars()
             .allMatch(chr -> ChatAllowedCharacters.isAllowedCharacter((char) chr))) {
             return;
         }
-        func_146459_b(toAppend);
+        pageInsertIntoCurrent(event.text);
     }
 }

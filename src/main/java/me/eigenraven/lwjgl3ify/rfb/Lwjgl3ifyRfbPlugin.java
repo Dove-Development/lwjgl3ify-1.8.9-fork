@@ -20,6 +20,7 @@ import com.gtnewhorizons.retrofuturabootstrap.api.RfbPlugin;
 import me.eigenraven.lwjgl3ify.rfb.transformers.ExtensibleEnumTransformer;
 import me.eigenraven.lwjgl3ify.rfb.transformers.ForgePatchTransformer;
 import me.eigenraven.lwjgl3ify.rfb.transformers.LwjglRedirectTransformer;
+import me.eigenraven.lwjgl3ify.rfb.transformers.MixinAsmCompatTransformer;
 import me.eigenraven.lwjgl3ify.rfb.transformers.UnfinalizeObjectHoldersTransformer;
 
 public class Lwjgl3ifyRfbPlugin implements RfbPlugin {
@@ -51,7 +52,7 @@ public class Lwjgl3ifyRfbPlugin implements RfbPlugin {
     @Override
     public @NotNull RfbClassTransformer @Nullable [] makeTransformers() {
         return new RfbClassTransformer[] { new LwjglRedirectTransformer(), new ExtensibleEnumTransformer(),
-            new UnfinalizeObjectHoldersTransformer(), new ForgePatchTransformer() };
+            new UnfinalizeObjectHoldersTransformer(), new ForgePatchTransformer(), new MixinAsmCompatTransformer() };
     }
 
     private void verifyJavaVersion() {

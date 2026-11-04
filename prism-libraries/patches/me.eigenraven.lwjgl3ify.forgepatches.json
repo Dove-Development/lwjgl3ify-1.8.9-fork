@@ -9,7 +9,7 @@
     ],
     "libraries": [
         {
-            "name": "com.github.GTNewHorizons:lwjgl3ify:${version}:forgePatches",
+            "name": "com.github.Dove-Development:lwjgl3ify:${version}:forgePatches",
             "MMC-hint": "local"
         }
     ]

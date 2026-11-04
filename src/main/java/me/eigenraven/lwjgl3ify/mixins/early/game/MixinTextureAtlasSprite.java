@@ -14,8 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinTextureAtlasSprite {
 
     @Inject(method = "loadSprite", at = @At("TAIL"))
-    void cleanupAfterLoadSprite(BufferedImage[] frames, AnimationMetadataSection aniData, boolean anisotropicFiltering,
-        CallbackInfo info) {
+    void cleanupAfterLoadSprite(BufferedImage[] frames, AnimationMetadataSection aniData, CallbackInfo info) {
         for (BufferedImage img : frames) {
             // Close any NativeBackedImage instances
             if (img instanceof AutoCloseable) {

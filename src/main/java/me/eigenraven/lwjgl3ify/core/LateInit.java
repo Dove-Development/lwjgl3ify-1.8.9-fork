@@ -2,7 +2,7 @@ package me.eigenraven.lwjgl3ify.core;
 
 import org.lwjglx.Sys;
 
-import cpw.mods.fml.relauncher.FMLLaunchHandler;
+import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 
 public class LateInit {
 

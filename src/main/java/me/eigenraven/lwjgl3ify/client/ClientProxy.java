@@ -14,10 +14,10 @@ import org.lwjgl.sdl.SDLVideo;
 import org.lwjglx.input.Keyboard;
 import org.lwjglx.opengl.Display;
 
-import cpw.mods.fml.client.event.ConfigChangedEvent;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.ProgressManager;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.ProgressManager;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import me.eigenraven.lwjgl3ify.CommonProxy;
 import me.eigenraven.lwjgl3ify.api.InputEvents;
 import me.eigenraven.lwjgl3ify.core.Config;

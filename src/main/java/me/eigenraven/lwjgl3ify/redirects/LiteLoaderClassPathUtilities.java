@@ -16,7 +16,7 @@ import com.gtnewhorizons.retrofuturabootstrap.api.ExtensibleClassLoader;
 import com.gtnewhorizons.retrofuturabootstrap.api.RetroFuturaBootstrap;
 import com.mumfrey.liteloader.launch.InjectionStrategy;
 
-import cpw.mods.fml.common.fakelwjgl3ify.SafeRuntimeExit;
+import net.minecraftforge.fml.common.fakelwjgl3ify.SafeRuntimeExit;
 
 @SuppressWarnings("unused") // used by ASM
 public abstract class LiteLoaderClassPathUtilities {

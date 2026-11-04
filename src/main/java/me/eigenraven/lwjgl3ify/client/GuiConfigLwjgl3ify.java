@@ -2,6 +2,7 @@ package me.eigenraven.lwjgl3ify.client;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BlockModelShapes;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.texture.TextureMap;
@@ -12,7 +13,7 @@ import org.lwjglx.input.Mouse;
 
 import com.google.common.collect.Lists;
 
-import cpw.mods.fml.client.config.GuiConfig;
+import net.minecraftforge.fml.client.config.GuiConfig;
 import me.eigenraven.lwjgl3ify.core.Config;
 
 @SuppressWarnings("unused")
@@ -22,9 +23,9 @@ public class GuiConfigLwjgl3ify extends GuiConfig {
         super(
             parent,
             Lists.newArrayList(
-                new ConfigElement<>(Config.config.getCategory(Config.CATEGORY_WINDOW)),
-                new ConfigElement<>(Config.config.getCategory(Config.CATEGORY_INPUT)),
-                new ConfigElement<>(Config.config.getCategory(Config.CATEGORY_GLCONTEXT))),
+                new ConfigElement(Config.config.getCategory(Config.CATEGORY_WINDOW)),
+                new ConfigElement(Config.config.getCategory(Config.CATEGORY_INPUT)),
+                new ConfigElement(Config.config.getCategory(Config.CATEGORY_GLCONTEXT))),
             "lwjgl3ify",
             "config",
             false,
@@ -46,7 +47,10 @@ public class GuiConfigLwjgl3ify extends GuiConfig {
             Config.reloadConfigObject();
         }
 
-        Block wool = Blocks.wool;
+        final Block wool = Blocks.wool;
+        final BlockModelShapes shapes = Minecraft.getMinecraft()
+            .getBlockRendererDispatcher()
+            .getBlockModelShapes();
         // Draw scroll test widget
         int ypos = 32 + (int) (16.0 * Mouse.totalScrollAmount);
         Minecraft.getMinecraft()
@@ -59,7 +63,7 @@ public class GuiConfigLwjgl3ify extends GuiConfig {
             while (ypos < 32) {
                 ypos += (height - 64);
             }
-            drawTexturedModelRectFromIcon(16, ypos, wool.getIcon(0, i), 16, 16);
+            drawTexturedModalRect(16, ypos, shapes.getTexture(wool.getStateFromMeta(i)), 16, 16);
             ypos += 16;
         }
     }

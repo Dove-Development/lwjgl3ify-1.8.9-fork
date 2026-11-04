@@ -35,11 +35,11 @@ public class ForgePatchTransformer implements RfbClassTransformer {
         return "forge-patch";
     }
 
-    public static final String CLASS_PATCH_MANAGER = "cpw.mods.fml.common.patcher.ClassPatchManager";
-    public static final String TRACING_PRINT_STREAM = "cpw.mods.fml.common.TracingPrintStream";
-    public static final String FML_SECURITY_MANAGER = "cpw.mods.fml.relauncher.FMLSecurityManager";
+    public static final String CLASS_PATCH_MANAGER = "net.minecraftforge.fml.common.patcher.ClassPatchManager";
+    public static final String TRACING_PRINT_STREAM = "net.minecraftforge.fml.common.TracingPrintStream";
+    public static final String FML_SECURITY_MANAGER = "net.minecraftforge.fml.relauncher.FMLSecurityManager";
     public static final String ENUM_HELPER = "net.minecraftforge.common.util.EnumHelper";
-    public static final String PROGRESS_BAR = "cpw.mods.fml.common.ProgressManager$ProgressBar";
+    public static final String PROGRESS_BAR = "net.minecraftforge.fml.common.ProgressManager$ProgressBar";
 
     public static final String[] PATCHED_CLASSES = new String[] { CLASS_PATCH_MANAGER, TRACING_PRINT_STREAM,
         FML_SECURITY_MANAGER, ENUM_HELPER, PROGRESS_BAR };

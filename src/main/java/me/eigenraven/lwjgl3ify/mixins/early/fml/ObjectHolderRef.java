@@ -3,7 +3,9 @@ package me.eigenraven.lwjgl3ify.mixins.early.fml;
 import java.lang.reflect.Field;
 
 import net.minecraft.init.Blocks;
-import net.minecraft.util.RegistryNamespaced;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.FMLLog;
+import net.minecraftforge.fml.common.registry.GameData;
 
 import org.apache.logging.log4j.Level;
 import org.spongepowered.asm.mixin.Mixin;
@@ -12,17 +14,19 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import com.google.common.base.Throwables;
 
-import cpw.mods.fml.common.FMLLog;
-import cpw.mods.fml.common.registry.GameData;
-
-@Mixin(targets = { "cpw.mods.fml.common.registry.ObjectHolderRef" }, remap = false)
+/**
+ * FML 1.8.9 strips {@code final} from @ObjectHolder fields by writing {@code Field.modifiers}, which Java 12+ hides,
+ * and then writes them through {@code sun.reflect.ReflectionFactory}, which is gone in Java 9+. lwjgl3ify's
+ * UnfinalizeObjectHoldersTransformer already removes {@code final} at class load time, so a plain reflective set works.
+ */
+@Mixin(targets = { "net.minecraftforge.fml.common.registry.ObjectHolderRef" }, remap = false)
 public class ObjectHolderRef {
 
     @Shadow(remap = false)
     private Field field;
 
     @Shadow(remap = false)
-    private String injectedObject;
+    private ResourceLocation injectedObject;
 
     @Shadow(remap = false)
     private boolean isBlock;
@@ -35,7 +39,7 @@ public class ObjectHolderRef {
      * @reason Simple helper function
      */
     @Overwrite(remap = false)
-    public static void makeWritable(Field f) {
+    private static void makeWritable(Field f) {
         try {
             f.setAccessible(true);
         } catch (Exception e) {
@@ -50,16 +54,15 @@ public class ObjectHolderRef {
     @Overwrite(remap = false)
     public void apply() {
         Object thing;
-        RegistryNamespaced registry;
         if (isBlock) {
-            registry = GameData.getBlockRegistry();
-            thing = registry.getObject(injectedObject);
+            thing = GameData.getBlockRegistry()
+                .getObject(injectedObject);
             if (thing == Blocks.air) {
                 thing = null;
             }
         } else if (isItem) {
-            registry = GameData.getItemRegistry();
-            thing = registry.getObject(injectedObject);
+            thing = GameData.getItemRegistry()
+                .getObject(injectedObject);
         } else {
             thing = null;
         }

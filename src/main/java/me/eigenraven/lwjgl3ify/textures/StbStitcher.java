@@ -10,7 +10,7 @@ import org.lwjgl.stb.STBRPNode;
 import org.lwjgl.stb.STBRPRect;
 import org.lwjgl.stb.STBRectPack;
 
-import cpw.mods.fml.common.ProgressManager;
+import net.minecraftforge.fml.common.ProgressManager;
 import me.eigenraven.lwjgl3ify.Lwjgl3ify;
 import me.eigenraven.lwjgl3ify.api.Lwjgl3Aware;
 

@@ -1,113 +1,149 @@
-# LWJGL3ify
+# LWJGL3ify for Minecraft 1.8.9
 
-Brings LWJGL3 and modern Java versions to Minecraft 1.7.10.
-Bundles [RetroFuturaBootstrap](https://github.com/GTNewHorizons/RetroFuturaBootstrap) as a flexible early load plugin system.
+Brings LWJGL3 (with SDL windowing and input) and modern Java (17, 21, 25) to Minecraft **1.8.9 Forge 11.15.1.2318**.
 
-# Usage
+This is a port of [GTNewHorizons/lwjgl3ify](https://github.com/GTNewHorizons/lwjgl3ify), which does the same for 1.7.10.
+It uses [RetroFuturaBootstrap](https://github.com/GTNewHorizons/RetroFuturaBootstrap) (RFB) in place of
+LaunchWrapper, like upstream.
 
-Lwjgl3ify depends on:
- - Unimixins (<https://github.com/LegacyModdingMC/UniMixins/>), use at least version 0.1.23 with the GTNHMixins module.
+> [!WARNING]
+> Alpha. Verified on Windows 11: a Prism Launcher-style production launch on Java 17, 21 and 25, plus the client in the
+> development environment and the Java 8 drop-in relauncher on Java 21 (all reaching the main menu and a freshly
+> generated world), and the dedicated server on Java 21 up to its EULA prompt. Not yet verified: macOS, Linux,
+> OptiFine and other mods, and interactive input (typing/IME, mouse feel, fullscreen toggling).
 
-Hodgepodge (<https://github.com/GTNewHorizons/Hodgepodge>) is strongly recommended, it has many Java 17+ compatibility patches for ARR mods (Biomes'o'Plenty, Witchery, JourneyMap, and more) which we could not directly fix in the GTNH forks.
+## Differences from upstream (1.7.10)
 
-## Client
+- Built with [essential-loom](https://github.com/EssentialGG/architectury-loom) (Forge 11.15.1.2318, MCP `stable_22`)
+  instead of RetroFuturaGradle, which only supports 1.7.10/1.12.2.
+- **No UniMixins dependency.** 1.8.9 has no UniMixins, so lwjgl3ify bundles SpongePowered Mixin 0.7.11 (the version
+  1.8.9 mods ship) and starts it itself. Mixin 0.7's bundled ASM 5 cannot read Java 9+ class files; lwjgl3ify lifts that
+  check at load time, which also fixes other mods' copies of Mixin 0.7 on modern Java.
+- Mixins were rewritten against 1.8.9 (e.g. the chat link opener moved to `GuiScreen`, signs store chat components).
+  The 1.7.10 mod compatibility mixins (Xaero's, BetterQuesting, BiblioCraft, OpenComputers, Steve's, Logistics Pipes,
+  Et Futurum) were dropped, since those mods target 1.7.10.
+- The STB texture loading/stitching mixins are skipped automatically when OptiFine is installed.
+- Forge patches and `EnumHelper` follow Forge 1.8.9 (`net.minecraftforge.fml` packages, 1.8.9's `EnumHelper` methods).
 
-### Non-GTNH 1.7.10 instance setup
+## Installation
 
-**If you are using a GregTech New Horizons pre-packaged Java 17+ instance, skip to the next section!**
+Use Java 17.0.6+, 21 or 25. Download the files from this repository's GitHub releases.
 
-To install in PrismLauncher or MultiMC:
+### Prism Launcher / MultiMC
 
-Copy the contents of `lwjgl3ify-VERSION-multimc.zip` to `instances/My Modpack/`. `mmc-pack.json` needs to be overwritten.
-Reload the launcher, and it should show up modified versions of Forge, Minecraft and LWJGL3 in the instance window.
-Put the mod jar (`lwjgl3ify-VERSION.jar`) in `mods/` in your instance's minecraft folder, it will get loaded as a coremod.
-The forgePatches jar will get automatically downloaded by the launcher.
+1. Create a Minecraft 1.8.9 instance (no need to install Forge).
+2. Copy the contents of `lwjgl3ify-VERSION-multimc.zip` into the instance folder (next to `instance.cfg`),
+   overwriting `mmc-pack.json`. Reload the launcher: the instance now shows "Minecraft with LWJGL3", "Forge-LWJGL3",
+   "LWJGL 3" and the lwjgl3ify components.
+3. Put the mod jar (`lwjgl3ify-VERSION.jar`) in the instance's `mods/` folder.
+4. Set the instance's Java to 17.0.6+, 21 or 25.
 
-Make sure you have installed the UniMixins GTNHMixins and Mixin modules, or the all modules combined jar.
+### Any launcher (experimental relauncher)
 
-Change the instance java version to 17.0.6, 19.0.2, 20 or 21 (or newer), these are the currently supported versions.
+Install Forge 1.8.9 as usual, launch it with Java 8 and drop `lwjgl3ify-VERSION.jar` into `mods/`. On startup, a window
+asks which modern Java to relaunch the game with (and its memory settings); lwjgl3ify then downloads LWJGL3 and the
+other libraries it needs into a cache folder and restarts the game on that Java. The settings are saved in
+`config/lwjgl3ify-relauncher.json`.
 
-### MultiMC setup (GTNH and non-GTNH)
+### Vanilla launcher
 
-> [!IMPORTANT]
-> If you're using GTNH 2.8.1 or older, use the lwjgl3ify 2.x arguments from <https://github.com/GTNewHorizons/lwjgl3ify/blob/19bdc08297eca6975beaf0886ceca3bbc83cf368/README.MD#multimc-setup-gtnh-and-non-gtnh>.
-> If you're using GTNH 2.5.1 or older, use the lwjgl3ify 1.x arguments from <https://github.com/GTNewHorizons/lwjgl3ify/blob/2229295b9fe5ed3304f62288f76f84bdb79ff5bb/README.MD#multimc-setup-gtnh-and-non-gtnh>.
-> The following arguments are relevant to the 3.x version.
+`version.json` from a release is a complete launcher profile (Minecraft 1.8.9, Forge, LWJGL3 and lwjgl3ify's early
+classpath jar). Put it in `.minecraft/versions/<id>/<id>.json`, where `<id>` is the `id` inside the file, and pick
+that version in the launcher. Then put the mod jar in `mods/`.
 
-For MultiMC, you need to manually put in extra java arguments, Prism Launcher can load them from the patches json files automatically:
+### Server
+
+1. Install a Forge 1.8.9 (11.15.1.2318) server with Forge's installer.
+2. Put the mod jar in `mods/`.
+3. Put the `forgePatches` jar next to the Forge universal and `minecraft_server.1.8.9.jar` jars and rename it to
+   `lwjgl3ify-forgePatches.jar`. Copy [java9args.txt](java9args.txt) next to it.
+4. Start the server with a modern Java:
+
+```
+java -Xmx4G -Xms4G @java9args.txt -jar lwjgl3ify-forgePatches.jar nogui
+```
+
+Thermos/Crucible-style hybrid servers are not supported.
+
+### MultiMC: manual JVM arguments
+
+Prism Launcher reads these from the instance patches; MultiMC needs them added to the instance's JVM arguments:
+
 ```
 -Dfile.encoding=UTF-8 -Djava.system.class.loader=com.gtnewhorizons.retrofuturabootstrap.RfbSystemClassLoader --enable-native-access ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.lang.invoke=ALL-UNNAMED --add-opens java.base/java.lang.ref=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.net.spi=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.nio.channels=ALL-UNNAMED --add-opens java.base/java.nio.charset=ALL-UNNAMED --add-opens java.base/java.nio.file=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.text=ALL-UNNAMED --add-opens java.base/java.time.chrono=ALL-UNNAMED --add-opens java.base/java.time.format=ALL-UNNAMED --add-opens java.base/java.time.temporal=ALL-UNNAMED --add-opens java.base/java.time.zone=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.util.concurrent.atomic=ALL-UNNAMED --add-opens java.base/java.util.concurrent.locks=ALL-UNNAMED --add-opens java.base/java.util.jar=ALL-UNNAMED --add-opens java.base/java.util.zip=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/jdk.internal.reflect=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.desktop/com.sun.imageio.plugins.png=ALL-UNNAMED --add-opens java.desktop/sun.awt.image=ALL-UNNAMED --add-opens java.desktop/sun.awt=ALL-UNNAMED --add-opens java.desktop/sun.lwawt.macosx=ALL-UNNAMED --add-opens java.sql.rowset/javax.sql.rowset.serial=ALL-UNNAMED --add-opens jdk.dynalink/jdk.dynalink.beans=ALL-UNNAMED --add-opens jdk.naming.dns/com.sun.jndi.dns=ALL-UNNAMED,java.naming
 ```
 
-### (Experimental) Relauncher installation
-
-To install in any client launcher, just drop the `lwjgl3ify-VERSION.jar` mod jar in the `mods/` directory and configure to launch with Java 8 as usual.
-On startup, a window should appear prompting you to select a modern Java version to relaunch with, and the JVM settings for that Java installation.
-
 ### Tweaking configs
-If you want to tweak your default window size, OpenGL context properties or other more advanced settings, check out the config file in `config/lwjgl3ify.cfg` after the first startup.
 
-## Server
-First, install a working 1.7.10 Forge server, from a modpack zip or using forge's installer.
-Then, install the mod jar (and unimixins, hodgepodge as needed) in `mods/`, and download the `forgePatches` jar. Put the forgePatches jar in the same folder as your forge-universal and minecraft server jars.
-**Thermos/Crucible/Hybrid servers are not supported!**.
-Lwjgl3ify also depends on Unimixins (<https://github.com/LegacyModdingMC/UniMixins/>), use at least version 0.1.7.
-Rename the forgePatches jar to just `lwjgl3ify-forgePatches.jar`. Create a file named `java9args.txt` with the contents of [the file in this repository](java9args.txt).
-You can now launch the server with a command like the following, assuming the first java executable on your PATH is java 11/17/newer:
-```
-java -Xmx6G -Xms6G @java9args.txt -jar lwjgl3ify-forgePatches.jar nogui
-```
+Window size, OpenGL context properties, input options and more are in `config/lwjgl3ify.cfg` after the first start.
 
-# LiteLoader compatibility
-To use LiteLoader with lwjgl3ify/RetroFuturaBootstrap the LiteloaderLoader by Midnight is required.
+## Development
 
-The install instructions can be found at [Midnight145/LiteloaderLoader/INSTALLATION.md](https://github.com/Midnight145/LiteloaderLoader/blob/master/INSTALLATION.md).
+You need JDK 17 (compiles the mod, Java 17 syntax lowered to Java 8 bytecode by Jabel) and JDK 21 (runs Gradle,
+essential-loom and the game). Gradle finds both automatically if they are installed.
+
+| Command | What it does |
+| --- | --- |
+| `./gradlew assemble` | Builds `build/libs/lwjgl3ify-VERSION.jar` (mod), `-forgePatches.jar`, `version.json`, and the Prism/CurseForge zips in `build/distributions/` |
+| `./gradlew runClient` / `runServer` | Runs the game from source on Java 21 through RFB with LWJGL3 |
+| `./gradlew runSmokeTest` | Runs the client with a test mod that opens a world, saves screenshots to `run/screenshots/`, checks the mixins and the SDL clipboard, then quits; look for `SMOKETEST PASSED` |
+| `./gradlew remapSmoketestJar` then `python tools/run-production-test.py` | Launches the built Prism instance zip with the production jars the way Prism would (verifying every library hash), plus the smoke test |
+| `python tools/run-production-test.py --relauncher --java8 <path to Java 8 java>` | Starts a stock Forge 1.8.9 install on Java 8 with just the mod jar added and lets the relauncher switch to modern Java |
+| `python tools/generate-launcher-metadata.py` | Regenerates `prism-libraries/` and `launcher-metadata/version.json` from Mojang's and Forge's metadata |
+| `./gradlew genSourcesWithVineflower` | Decompiles Minecraft + Forge (MCP names) for reading |
+
+Releases: pushing a tag builds with that tag as the version and attaches the jars and zips to a GitHub release
+(`.github/workflows/release-tags.yml`). The vanilla launcher `version.json` downloads the forgePatches jar from that
+release, so the tag must equal the version.
 
 # How does it work?
 
-There are a few components to enabling modern java and lwjgl usage on old minecraft versions, lwjgl3ify implements these for 1.7.10 specifically:
+There are a few components to enabling modern Java and LWJGL3 on old Minecraft versions; lwjgl3ify implements them for
+1.8.9 here:
 
- - A modified launcher profile (templates are in `prism-libraries`) to modify the library list loaded into the java classpath - to install LWJGL3, and our forgePatches jar that includes libraries such as ASM 9 or new Apache Commons.
- - A custom server launcher jar with the modified `Class-Path` META-INF manifest entry (integrated into our forgePatches jar)
- - A FOSS replacement for launchwrapper with a java 9+-compatible classpath discovery mechanism and wider-reaching transformer capabilities at <https://github.com/GTNewHorizons/RetroFuturaBootstrap>.
- - A lot of add-opens flags for the JVM to allow reflection into JVM internals. Unfortunately a lot of libraries and mods depend on this to work, even weird ones like `java.text` or `nio` internals in case of Netty.
- - A partially auto-generated compatibility shim redirecting lwjgl2 api calls into the matching lwjgl3 calls (in `src/main/java/org/lwjglx`, `src/generated/java/org/lwjglx`), the generator is in `src/util/java`
- - Dummy `org/lwjgl/*` classes matching the classes removed from lwjgl3 (e.g. Display) for mods that rely on finding them under that location in the classpath - e.g. for mixin metadata
- - Replacement GL vendor information provider for crash reports, the old one caused JVM crashes if it was used from a thread without a valid OpenGL context
- - Asm transformers:
-   - Asm transformer renaming any access to org/lwjgl to org/lwjglx after all other transformations have been done to the class - in `LwjglRedirectTransformer.java`
-   - `javax/xml/bind` -> `jakarta/xml/bind/` asm transformer and a shaded version of jakarta.xml.bind, because that API was removed from JRE 11
-   - Extensible enum transformer (copied under the lgpl license from Forge for minecraft 1.19.3) to replace a lot of the EnumHelper usages
-   - Object holders unfinalizer, to remove the need for overwriting `static final` fields in Forge.
-   - `FixConstantPoolInterfaceMethodRefHelper` is a transformer to fix a javac 8/asm 5.0 reobfuscator bug which generated wrong entries in the constant pool if method handles to interface methods were used
+ - A modified launcher profile (templates in `prism-libraries`, `curse-metadata` and `launcher-metadata`) that changes
+   the libraries loaded onto the classpath: LWJGL2 is replaced by LWJGL3, and the forgePatches jar brings
+   RetroFuturaBootstrap and newer libraries such as ASM 9, Apache Commons, JAXB and Nashorn.
+ - A custom server launcher with the modified `Class-Path` manifest entry (integrated into the forgePatches jar).
+ - A FOSS replacement for LaunchWrapper with a Java 9+-compatible classpath discovery mechanism and wider-reaching
+   transformer capabilities: <https://github.com/GTNewHorizons/RetroFuturaBootstrap>.
+ - A lot of add-opens flags for the JVM to allow reflection into JVM internals, which many libraries and mods rely on.
+ - A partially auto-generated compatibility shim redirecting LWJGL2 API calls to the matching LWJGL3 calls
+   (`src/main/java/org/lwjglx`, `src/generated/java/org/lwjglx`); the generator is in `src/util/java`.
+ - Dummy `org/lwjgl/*` classes matching the classes removed from LWJGL3 (e.g. `Display`) for mods that look for them
+   on the classpath.
+ - RFB transformers:
+   - Renaming any access to `org/lwjgl` to `org/lwjglx` after all other transformations (`LwjglRedirectTransformer`).
+   - `javax/xml/bind` → `jakarta/xml/bind`, `java/util/jar/Pack200` → a Commons Compress implementation, `jdk/nashorn`
+     → the standalone Nashorn, for APIs removed from the JDK.
+   - Extensible enums (adapted under the LGPL from Forge for Minecraft 1.19.3) to replace `EnumHelper`'s reflection.
+   - Object holder unfinalizer, to remove the need for overwriting `static final` fields in Forge.
+   - Forge patches (`ForgePatchTransformer`): the class patch loader's EOF loop, `TracingPrintStream` closing
+     `System.out`, `FMLSecurityManager` array bounds, `EnumHelper` redirected to lwjgl3ify's implementation, and loading
+     progress forwarded to the window's taskbar progress.
+   - Mixin 0.7's relocated ASM accepting Java 9+ class files (`MixinAsmCompatTransformer`).
  - Mixins:
-   - Object holder modifications to no longer write to `static final` fields
-   - JarDiscoverer change to ignore `module-info.class` and `META-INF/versions/*` classes because it's not Java 9-aware
-   - PostMixinTransformInjector used to move our asm transformer to run after the mixin processing
- - `UnsafeHacks` class from modern forge, modified to work in more usecases, for replacing some `static final` writes where it was not feasible/easy to remove final.
- - Forge patches, which are modified classes from Forge that cannot be transformed because they are loaded too early - so we load a `forgePatches` jar before Forge in the classpath to replace them:
-   - EventSubscriptionTransformer: the format of subclass annotation descriptors has slightly changed in Java 17, this makes the annotation discovery compatible with both
-   - TerminalTransformer: modify to accept classfiles newer than what asm5 supported
-   - ClassPatchManager: switches the Pack200 implementation to an Apache Commons Compress one because it was removed from newer JDKs
-   - TracingPrintStream: commons-compress closes System.out, this blocks this from happening
-   - CoreModManager: work around the fact that the system classloader is no longer a URLClassLoader
-   - FMLSecurityManager: fix some array index out of bounds exceptions, it is also deprecated in java 17 and will need to be replaced once a new API is available
-   - EnumHelper: replace all the enumhelper apis with new variants using the extensible enum transformer and unsafe hacks.
- - Additional performance-enhancing mixins making use of LWJGL3 features:
-   - spng-based image loader, much faster than Image4J
-   - STB_rectpack-based texture sticher, it's nearly instant with tens of thousands of textures, compared to the vanilla code which takes many seconds to stitch that many textures into an atlas
+   - Object holder application without writing to `static final` fields.
+   - `JarDiscoverer` ignoring `module-info.class` and `META-INF/versions/*`, since it is not Java 9-aware.
+   - Clipboard, URL opening and IME text input through SDL instead of AWT.
+   - Sub-pixel mouse movement, and window resizing in borderless fullscreen.
+ - Performance improvements using LWJGL3 libraries:
+   - spng-based texture loading, much faster than ImageIO.
+   - An STB rectpack-based texture stitcher, nearly instant with tens of thousands of textures.
 
 ## Fixing mods
 
-This mod is not enough to make modpacks work in Java 9+, mods had to be updated. Here's a potentially incomplete list of breaking changes that needed code changes in mods, or mixins to fix non-open-source mods:
+This mod is not enough to make every mod work on Java 9+; some mods need code changes. A potentially incomplete list
+of breaking changes:
 
-#### (NOT IN lwjgl3ify) System class loader is no longer a URLClassLoader
+#### (NOT IN lwjgl3ify) The system class loader is no longer a URLClassLoader
 
-Lwjgl3ify replaces the system classloader with its own URLClassLoader-derived class that supports addURL and getURLs via public method calls that are compatible with the old reflection access for them.
+Lwjgl3ify replaces the system classloader with its own URLClassLoader-derived class that supports addURL and getURLs
+via public method calls compatible with the old reflection access to them.
 
-To get the classpath, simply split `System.getProperty("java.class.path")` by `File.pathSeparator`.
+To get the classpath, split `System.getProperty("java.class.path")` by `File.pathSeparator`.
 
-Do note that for most mods, their classloader is still a `LaunchClassLoader` which does extend `URLClassLoader`.
+For most mods, their classloader is still a `LaunchClassLoader`, which does extend `URLClassLoader`.
 
 To modify the URLClassPath you can use the following code:
 ```java
@@ -141,11 +177,14 @@ public static void addUrlToClassloader(ClassLoader loader, URL coreModUrl) {
 ```
 
 #### `java.base/java.lang.reflect` classes are protected from reflective access
-E.g. `Field.class.getDeclaredFields()` returns an empty list. The most common use of this was to change the `modifiers` field to strip `final` from the Field accessor to trick it into letting you write into `static final` fields.
-Instead of that, use an access transformer (`public-f class field_srg # field_mcp`) to remove the `final` attribute at class load time.
-Alternatively, inject a different initializer via Mixins/asm by modifying the class static constructor special method `<clinit>`.
 
-If that is not feasible (e.g. runtime reflection discovering fields), you can use `sun.misc.Unsafe` to directly write to the memory location of the final field like so:
+E.g. `Field.class.getDeclaredFields()` returns an empty list. The most common use of this was to change the
+`modifiers` field to strip `final` from a field so `static final` fields could be written.
+Instead, use an access transformer (`public-f class field_srg # field_mcp`) to remove `final` at class load time, or
+inject a different initializer via Mixins/ASM into the class's static initializer `<clinit>`.
+
+If that is not feasible (e.g. runtime reflection discovering fields), `sun.misc.Unsafe` can write the field's memory
+directly:
 ```java
 final Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
 theUnsafe.setAccessible(true);
@@ -163,14 +202,15 @@ public static void setField(Field data, Object object, Object value) {
 }
 ```
 
-This is likely to be removed from a 2025 Java release though, I'll probably build a JNI-based alternative built into lwjgl3ify by then.
+**Beware**: the JIT compiler assumes final fields don't change at runtime, so a value written through Unsafe might not
+be read back by some code, leading to inconsistent states.
 
-**Beware**, the Java JIT compiler will assume that final fields don't change value at runtime, so the value you write there using Unsafe might not actually be read back by some code.
-This can lead to inconsistent states, where some methods might see the old value while other ones will see the new value, especially if you change the value down a callchain that already read the value earlier.
+#### Mixin 0.8+ features
 
-### Development
+1.8.9 mods bundle Mixin 0.7.x, and so does lwjgl3ify. Mods that need Mixin 0.8 (MixinExtras, newer injectors) ship
+their own Mixin loader and are outside what lwjgl3ify sets up.
 
-First, do `./gradlew build` and use the zip in `./build/distributions/lwjgl3ify-VERSION-multimc.zip` to install lwjgl3ify into a 1.7.10 forge instance in Prism.
-Install the mod jar from `./build/libs/` as usual.
+# Credits and license
 
-When testing in the deobfuscated environment, please use the `runClient`/`runServer` tasks that run with modern java by default. `runClient17` et al. are no-ops.
+LWJGL3ify was created by eigenraven and the GTNewHorizons contributors; see the upstream repository for its history.
+This 1.8.9 port is maintained by Dove-Development. Licensed under the [LGPL-3.0](LICENSE), like upstream.

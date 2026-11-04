@@ -11,10 +11,10 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import com.google.common.base.Throwables;
 
-import cpw.mods.fml.common.FMLLog;
-import cpw.mods.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.common.FMLLog;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 
-@Mixin(targets = { "cpw.mods.fml.common.registry.ItemStackHolderRef" }, remap = false)
+@Mixin(targets = { "net.minecraftforge.fml.common.registry.ItemStackHolderRef" }, remap = false)
 public class ItemStackHolderRef {
 
     @Shadow(remap = false)

@@ -11,10 +11,10 @@ import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.SidedProxy;
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import me.eigenraven.lwjgl3ify.api.ConfigUtils;
 import me.eigenraven.lwjgl3ify.core.Config;
 
@@ -22,7 +22,7 @@ import me.eigenraven.lwjgl3ify.core.Config;
     modid = "lwjgl3ify",
     name = "Lwjgl3ify",
     version = Tags.VERSION,
-    acceptedMinecraftVersions = "[1.7.10]",
+    acceptedMinecraftVersions = "[1.8.9]",
     acceptableRemoteVersions = "*",
     guiFactory = "me.eigenraven.lwjgl3ify.client.GuiFactory")
 public class Lwjgl3ify {

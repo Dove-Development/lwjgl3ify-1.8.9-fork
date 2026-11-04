@@ -10,7 +10,6 @@ import java.util.Map;
 import net.minecraft.block.BlockPressurePlate.Sensitivity;
 import net.minecraft.block.material.Material;
 import net.minecraft.enchantment.EnumEnchantmentType;
-import net.minecraft.entity.Entity.EnumEntitySize;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.item.EntityPainting.EnumArt;
@@ -28,7 +27,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import com.google.common.base.Throwables;
 
-import cpw.mods.fml.common.FMLLog;
+import net.minecraftforge.fml.common.FMLLog;
 
 @SuppressWarnings("unused") // used from asm
 public class EnumHelper {
@@ -36,10 +35,10 @@ public class EnumHelper {
     // Some enums are decompiled with extra arguments, so lets check for that
     @SuppressWarnings("rawtypes")
     private static Class[][] commonTypes = { { EnumAction.class },
-        { ArmorMaterial.class, int.class, int[].class, int.class },
+        { ArmorMaterial.class, String.class, int.class, int[].class, int.class },
         { EnumArt.class, String.class, int.class, int.class, int.class, int.class }, { EnumCreatureAttribute.class },
         { EnumCreatureType.class, Class.class, int.class, Material.class, boolean.class, boolean.class },
-        { Door.class }, { EnumEnchantmentType.class }, { EnumEntitySize.class }, { Sensitivity.class },
+        { Door.class }, { EnumEnchantmentType.class }, { Sensitivity.class },
         { MovingObjectType.class }, { EnumSkyBlock.class, int.class }, { EnumStatus.class },
         { ToolMaterial.class, int.class, int.class, float.class, float.class, int.class },
         { EnumRarity.class, EnumChatFormatting.class, String.class } };
@@ -48,9 +47,9 @@ public class EnumHelper {
         return addEnum(EnumAction.class, name);
     }
 
-    public static ArmorMaterial addArmorMaterial(String name, int durability, int[] reductionAmounts,
-        int enchantability) {
-        return addEnum(ArmorMaterial.class, name, durability, reductionAmounts, enchantability);
+    public static ArmorMaterial addArmorMaterial(String name, String textureName, int durability,
+        int[] reductionAmounts, int enchantability) {
+        return addEnum(ArmorMaterial.class, name, textureName, durability, reductionAmounts, enchantability);
     }
 
     public static EnumArt addArt(String name, String tile, int sizeX, int sizeY, int offsetX, int offsetY) {
@@ -73,10 +72,6 @@ public class EnumHelper {
 
     public static EnumEnchantmentType addEnchantmentType(String name) {
         return addEnum(EnumEnchantmentType.class, name);
-    }
-
-    public static EnumEntitySize addEntitySize(String name) {
-        return addEnum(EnumEntitySize.class, name);
     }
 
     public static Sensitivity addSensitivity(String name) {

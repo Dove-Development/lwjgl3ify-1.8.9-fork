@@ -14,10 +14,10 @@ import net.minecraft.launchwrapper.LaunchClassLoader;
 
 import org.apache.logging.log4j.LogManager;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.CoreModManager;
-import cpw.mods.fml.relauncher.FMLLaunchHandler;
-import cpw.mods.fml.relauncher.FMLRelaunchLog;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.relauncher.CoreModManager;
+import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
+import net.minecraftforge.fml.relauncher.FMLRelaunchLog;
 
 public class Lwjgl3ifyRelauncherTweaker implements ITweaker {
 
@@ -57,16 +57,18 @@ public class Lwjgl3ifyRelauncherTweaker implements ITweaker {
             // If this tweaker is loaded, FML skips loading the coremod by default.
             Launch.classLoader.addTransformerExclusion("me.eigenraven.lwjgl3ify.core.Lwjgl3ifyCoremod");
             final Class<CoreModManager> cmmClass = (Class<CoreModManager>) Class
-                .forName("cpw.mods.fml.relauncher.CoreModManager", true, Launch.classLoader);
+                .forName("net.minecraftforge.fml.relauncher.CoreModManager", true, Launch.classLoader);
 
             if (isReparseable) {
+                // FML 1.8.9 puts jars with a TweakClass on its ignored list, so their @Mod classes would never be
+                // found. Move this jar to the reparseable list instead, like Mixin does for MixinTweaker jars.
+                final Method cmmGetIgnoredMods = cmmClass.getMethod("getIgnoredMods");
                 final Method cmmGetReparseableCoremods = cmmClass.getMethod("getReparseableCoremods");
-                final Method cmmGetLoadedCoremods = cmmClass.getMethod("getLoadedCoremods");
+                final List<String> ignoredMods = (List<String>) cmmGetIgnoredMods.invoke(null);
                 final List<String> reparseableCoremods = (List<String>) cmmGetReparseableCoremods.invoke(null);
-                final List<String> loadedCoremods = (List<String>) cmmGetLoadedCoremods.invoke(null);
-                if (loadedCoremods.remove(coreModName)) {
+                if (ignoredMods.remove(coreModName)) {
                     FMLRelaunchLog.log.getLogger()
-                        .info("Removed lwjgl3ify from the list of non-mod coremods");
+                        .info("Removed lwjgl3ify from the list of ignored mod files");
                 }
                 if (!reparseableCoremods.contains(coreModName)) {
                     reparseableCoremods.add(coreModName);
@@ -113,6 +115,14 @@ public class Lwjgl3ifyRelauncherTweaker implements ITweaker {
     @Override
     public void injectIntoClassLoader(LaunchClassLoader classLoader) {
         injectMyCoremod();
+        if (Launch.blackboard.get("lwjgl3ify:rfb-booted") == Boolean.TRUE) {
+            // There is no UniMixins on 1.8.9: start the bundled Mixin 0.7 (or another mod's copy of it) and register
+            // lwjgl3ify's mixin config. Tweakers can only be queued here, not while the tweaker list is being
+            // iterated in the constructors.
+            final List<String> tweakClasses = (List<String>) Launch.blackboard.get("TweakClasses");
+            tweakClasses.add("org.spongepowered.asm.launch.MixinTweaker");
+            tweakClasses.add("me.eigenraven.lwjgl3ify.core.Lwjgl3ifyMixinTweaker");
+        }
     }
 
     @Override

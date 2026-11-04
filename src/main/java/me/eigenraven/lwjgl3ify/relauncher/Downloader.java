@@ -112,6 +112,10 @@ public class Downloader {
                     final JsonObject elDownloads = elLibrary.getAsJsonObject("downloads");
                     // URL artifact
                     if (elDownloads.has("artifact")) {
+                        if (elGav.contains(":lwjgl3ify:")) {
+                            // The forgePatches jar is bundled in the mod jar, see Relauncher#createClasspath
+                            continue;
+                        }
                         // No classifiers
                         final JsonObject elArtifact = elDownloads.getAsJsonObject("artifact");
                         addArtifactDownload(elGav, elArtifact, tasks);
@@ -154,7 +158,7 @@ public class Downloader {
             final JsonObject elClientDownload = versionRoot.getAsJsonObject()
                 .getAsJsonObject("downloads")
                 .getAsJsonObject("client");
-            addArtifactDownload("net.minecraft:client:1.7.10", elClientDownload, tasks);
+            addArtifactDownload("net.minecraft:client:1.8.9", elClientDownload, tasks);
 
             for (Iterator<DownloadTask> it = tasks.iterator(); it.hasNext();) {
                 final DownloadTask task = it.next();

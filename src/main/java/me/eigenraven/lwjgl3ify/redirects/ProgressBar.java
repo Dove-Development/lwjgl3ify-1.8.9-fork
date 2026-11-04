@@ -1,6 +1,6 @@
 package me.eigenraven.lwjgl3ify.redirects;
 
-import cpw.mods.fml.relauncher.FMLLaunchHandler;
+import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 import me.eigenraven.lwjgl3ify.client.ClientProxy;
 
 public final class ProgressBar {

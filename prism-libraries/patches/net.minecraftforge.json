@@ -1,18 +1,18 @@
 {
     "+tweakers": [
-        "cpw.mods.fml.common.launcher.FMLTweaker"
+        "net.minecraftforge.fml.common.launcher.FMLTweaker"
     ],
     "formatVersion": 1,
     "libraries": [
         {
             "downloads": {
                 "artifact": {
-                    "sha1": "25fd97f72beca728112256938e03e8105b1b78cc",
-                    "size": 3018833,
-                    "url": "https://maven.minecraftforge.net/net/minecraftforge/forge/1.7.10-10.13.4.1614-1.7.10/forge-1.7.10-10.13.4.1614-1.7.10-universal.jar"
+                    "sha1": "beda619c465af293e63952dd573c137c17c0a4cd",
+                    "size": 3805686,
+                    "url": "https://maven.minecraftforge.net/net/minecraftforge/forge/1.8.9-11.15.1.2318-1.8.9/forge-1.8.9-11.15.1.2318-1.8.9-universal.jar"
                 }
             },
-            "name": "net.minecraftforge:forge:1.7.10-10.13.4.1614-1.7.10:universal"
+            "name": "net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9:universal"
         },
         {
             "downloads": {
@@ -137,24 +137,34 @@
         {
             "downloads": {
                 "artifact": {
-                    "sha1": "9c6ef172e8de35fd8d4d8783e4821e57cdef7445",
-                    "size": 2243036,
-                    "url": "https://libraries.minecraft.net/com/google/guava/guava/17.0/guava-17.0.jar"
+                    "sha1": "79846ba34cbd89e2422d74d53752f993dcc2ccaf",
+                    "size": 318956,
+                    "url": "https://libraries.minecraft.net/java3d/vecmath/1.5.2/vecmath-1.5.2.jar"
                 }
             },
-            "name": "com.google.guava:guava:17.0"
+            "name": "java3d:vecmath:1.5.2"
+        },
+        {
+            "downloads": {
+                "artifact": {
+                    "sha1": "42ccaf4761f0dfdfa805c9e340d99a755907e2dd",
+                    "size": 2523218,
+                    "url": "https://libraries.minecraft.net/net/sf/trove4j/trove4j/3.0.3/trove4j-3.0.3.jar"
+                }
+            },
+            "name": "net.sf.trove4j:trove4j:3.0.3"
         }
     ],
     "mainClass": "com.gtnewhorizons.retrofuturabootstrap.Main",
     "name": "Forge-LWJGL3",
     "order": 5,
-    "releaseTime": "2015-12-10T00:05:37-05:00",
+    "releaseTime": "2017-06-08T04:26:33+0000",
     "requires": [
         {
-            "equals": "1.7.10",
+            "equals": "1.8.9",
             "uid": "net.minecraft"
         }
     ],
     "uid": "net.minecraftforge",
-    "version": "10.13.4.1614"
+    "version": "11.15.1.2318"
 }

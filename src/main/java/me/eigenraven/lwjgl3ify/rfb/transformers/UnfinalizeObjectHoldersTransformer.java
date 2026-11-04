@@ -28,10 +28,10 @@ public class UnfinalizeObjectHoldersTransformer implements RfbClassTransformer {
 
     private final static HashSet<String> OBJECT_HOLDERS = new HashSet<>(
         Arrays.asList(
-            "Lcpw/mods/fml/common/registry/GameRegistry$ObjectHolder;",
-            "Lcpw/mods/fml/common/registry/GameRegistry$ItemStackHolder;",
-            "Lcpw/mods/fml/common/registry/GameRegistry/ObjectHolder;",
-            "Lcpw/mods/fml/common/registry/GameRegistry/ItemStackHolder;"));
+            "Lnet/minecraftforge/fml/common/registry/GameRegistry$ObjectHolder;",
+            "Lnet/minecraftforge/fml/common/registry/GameRegistry$ItemStackHolder;",
+            "Lnet/minecraftforge/fml/common/registry/GameRegistry/ObjectHolder;",
+            "Lnet/minecraftforge/fml/common/registry/GameRegistry/ItemStackHolder;"));
 
     private final static BytePatternMatcher holderMatcher = new BytePatternMatcher(
         OBJECT_HOLDERS.toArray(new String[0]),
