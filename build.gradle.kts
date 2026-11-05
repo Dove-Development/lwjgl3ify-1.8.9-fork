@@ -429,6 +429,8 @@ tasks.processResources {
 // Minecraft / Loom
 // ---------------------------------------------------------------------------------------------------------------------
 
+val isMacOs = System.getProperty("os.name").lowercase().contains("mac")
+
 loom {
     forge {
         pack200Provider.set(dev.architectury.pack200.java.Pack200Adapter())
@@ -444,6 +446,10 @@ loom {
             // variant keeps the JVM's first thread for SDL's event loop and runs the game on another thread.
             mainClass.set("com.gtnewhorizons.retrofuturabootstrap.MainStartOnFirstThread")
             vmArgs(extraJavaArgs)
+            if (isMacOs && !vmArgs.contains("-XstartOnFirstThread")) {
+                // macOS only lets the JVM's first thread drive the window (Cocoa)
+                vmArg("-XstartOnFirstThread")
+            }
             // Dev counterpart of what the relauncher tweaker does in production: the coremod (which brings in
             // the RFB plugin's late init) and Mixin.
             property("fml.coreMods.load", "me.eigenraven.lwjgl3ify.core.Lwjgl3ifyCoremod")

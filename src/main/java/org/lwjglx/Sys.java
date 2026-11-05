@@ -48,11 +48,11 @@ public class Sys {
                 MemoryUtil::nmemCallocChecked,
                 MemoryUtil::nmemReallocChecked,
                 MemoryUtil::nmemFree);
-            checkSdl(SDL_SetAppMetadata("Lwjgl3ify Minecraft", "1.7.10", Config.APP_ID));
+            checkSdl(SDL_SetAppMetadata("Lwjgl3ify Minecraft", "1.8.9", Config.APP_ID));
             checkSdl(
                 SDL_SetAppMetadataProperty(
                     SDL_PROP_APP_METADATA_URL_STRING,
-                    "https://github.com/GTNewHorizons/lwjgl3ify"));
+                    "https://github.com/Dove-Development/lwjgl3ify-1.8.9-fork"));
             checkSdl(SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_CREATOR_STRING, "Mojang, GTNH Team"));
             checkSdl(
                 SDL_SetAppMetadataProperty(

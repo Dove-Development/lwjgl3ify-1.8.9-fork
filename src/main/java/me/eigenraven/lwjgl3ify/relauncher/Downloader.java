@@ -74,9 +74,11 @@ public class Downloader {
             String osFull = "";
             String os = "";
             String archBits = SystemUtils.OS_ARCH.contains("64") ? "64" : "32";
-            final boolean isArm = SystemUtils.OS_ARCH.equalsIgnoreCase("aarch64")
-                || SystemUtils.OS_ARCH.toLowerCase(Locale.ROOT)
-                    .startsWith("arm");
+            // os.arch is "aarch64" for 64-bit ARM JVMs, and "arm"/"armhf"/"armv7l"... for 32-bit ones
+            final String osArch = SystemUtils.OS_ARCH.toLowerCase(Locale.ROOT);
+            final boolean isArm64 = osArch.equals("aarch64") || osArch.equals("arm64");
+            final boolean isArm32 = !isArm64 && osArch.startsWith("arm");
+            final boolean isArm = isArm64 || isArm32;
             if (SystemUtils.IS_OS_WINDOWS) {
                 osFull = isArm ? "windows-arm64" : "windows";
                 os = "windows";
@@ -84,8 +86,7 @@ public class Downloader {
                 osFull = isArm ? "osx-arm64" : "osx";
                 os = "osx";
             } else if (SystemUtils.IS_OS_LINUX) {
-                // There is also linux-arm32, but does anyone care?
-                osFull = isArm ? "linux-arm64" : "linux";
+                osFull = isArm64 ? "linux-arm64" : (isArm32 ? "linux-arm32" : "linux");
                 os = "linux";
             } else {
                 throw new UnsupportedOperationException(

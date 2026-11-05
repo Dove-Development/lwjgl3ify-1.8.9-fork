@@ -69,20 +69,36 @@ def current_os():
     return "linux"
 
 
-def is_arm():
-    return platform.machine().lower() in ("arm64", "aarch64")
+def current_arch():
+    """Architecture names as Prism Launcher maps them (RuntimeContext::mappedJavaRealArchitecture)."""
+    machine = platform.machine().lower()
+    if machine in ("amd64", "x86_64"):
+        return "x86_64"
+    if machine in ("i386", "i686", "x86"):
+        return "x86"
+    if machine in ("arm64", "aarch64"):
+        return "arm64"
+    if machine.startswith("arm"):
+        return "arm32"
+    return machine
+
+
+def os_rule_matches(name):
+    """Prism Launcher's RuntimeContext::classifierMatches: "<os>-<arch>" always, a bare "<os>" only on x86/x86_64."""
+    if name == current_os() + "-" + current_arch():
+        return True
+    return current_arch() in ("x86_64", "x86") and name == current_os()
 
 
 def rules_allow(rules):
     if not rules:
         return True
-    os_names = {current_os(), current_os() + ("-arm64" if is_arm() else "")}
     allowed = False
     for rule in rules:
         matches = True
         if "os" in rule:
             want = rule["os"].get("name")
-            if want is not None and want not in os_names:
+            if want is not None and not os_rule_matches(want):
                 matches = False
             if rule["os"].get("arch") == "x86" and platform.architecture()[0] != "32bit":
                 matches = False
@@ -200,6 +216,9 @@ def prism_command(args, work, game, libraries, natives):
     main_class = mc_args = main_jar = asset_index = None
     for component in components:
         jvm_args += component.get("+jvmArgs", [])
+        if "FirstThreadOnMacOS" in component.get("+traits", []) and current_os() == "osx":
+            # What Prism does for this trait: macOS only lets the JVM's first thread drive windows
+            jvm_args.append("-XstartOnFirstThread")
         tweakers += component.get("+tweakers", [])
         main_class = component.get("mainClass", main_class)
         mc_args = component.get("minecraftArguments", mc_args)
@@ -231,8 +250,10 @@ def stock_forge_command(args, work, game, libraries, natives):
         json.dump({"javaInstallationsCache": [args.java], "javaInstallation": 0, "hideSettingsOnLaunch": True,
                    "forwardLogs": True}, f)
     cache = os.path.join(work, "relauncher-cache", "maven")
-    cmd = [args.java8, "-Dlwjgl3ify.relauncher.mavenDownloadRoot=" + cache, "-Djava.library.path=" + natives,
-           "-cp", os.pathsep.join(classpath), "net.minecraft.launchwrapper.Launch"]
+    first_thread = ["-XstartOnFirstThread"] if current_os() == "osx" else []  # as the vanilla launcher does
+    cmd = [args.java8] + first_thread + ["-Dlwjgl3ify.relauncher.mavenDownloadRoot=" + cache,
+                                         "-Djava.library.path=" + natives, "-cp", os.pathsep.join(classpath),
+                                         "net.minecraft.launchwrapper.Launch"]
     return cmd + game_arguments(mojang["minecraftArguments"], game, args.assets, mojang["assetIndex"]["id"],
                                 ["net.minecraftforge.fml.common.launcher.FMLTweaker"]), classpath
 
