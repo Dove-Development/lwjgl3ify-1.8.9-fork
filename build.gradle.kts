@@ -726,7 +726,8 @@ val versionJsonFile = tasks.register<VersionJsonTask>("versionJson") {
     inputs.property("version", project.version)
     inputs.property("jvmArgs", extraJavaArgs)
     outputs.file(versionJsonPath)
-    lwjgl3Json = makeLwjgl3Json.flatMap { it.outputFile }
+    // The vanilla launcher (and Dove) need each library's "path", which only the -curse list has
+    lwjgl3Json = makeLwjgl3Json.flatMap { it.outputFileCurse }
     val projVersion = project.version.toString()
     val jvmArgs = extraJavaArgs.joinToString(", ") { '"' + it + '"' }
     val versionJsonPathLocal = versionJsonPath

@@ -92,9 +92,18 @@ essential-loom and the game). Gradle finds both automatically if they are instal
 | `python tools/generate-launcher-metadata.py` | Regenerates `prism-libraries/` and `launcher-metadata/version.json` from Mojang's and Forge's metadata |
 | `./gradlew genSourcesWithVineflower` | Decompiles Minecraft + Forge (MCP names) for reading |
 
-Releases: pushing a tag builds with that tag as the version and attaches the jars and zips to a GitHub release
-(`.github/workflows/release-tags.yml`). The vanilla launcher `version.json` downloads the forgePatches jar from that
-release, so the tag must equal the version.
+### Versions and releases
+
+The fork has its own `MAJOR.MINOR.PATCH` version, `modVersion` in `gradle.properties` (the upstream version it is
+based on is `upstreamVersion`). `python tools/bump-version.py patch|minor|major` bumps it locally.
+
+To publish, run **Actions > Release > Run workflow** (`.github/workflows/release.yml`) and pick the bump: it updates
+`gradle.properties`, commits, tags the commit with the version (no `v` prefix), builds, and publishes a GitHub release
+with the mod jar, the forgePatches jar, `version.json`, the Prism/CurseForge zips and a `SHA256SUMS` file. Pushing a
+tag yourself releases that tag as the version instead. Releases before 1.0.0 are marked as pre-releases.
+
+The vanilla launcher `version.json` and the Dove launcher download the release files from the tag, so a release's
+tag always equals its version.
 
 # How does it work?
 
