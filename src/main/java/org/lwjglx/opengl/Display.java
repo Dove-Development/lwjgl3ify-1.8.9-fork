@@ -328,6 +328,10 @@ public class Display {
             displayVisible = (actualWindowFlags & SDL_WINDOW_MINIMIZED) == 0;
 
             updateWindowSizeFromSdl(false);
+            // On a HiDPI screen (a Retina Mac) the framebuffer is larger than the size the game asked
+            // for. The game only reads the size again after a resize, so without this it draws into
+            // the bottom-left corner until the window is resized.
+            latestResized = displayFramebufferWidth != mode.getWidth() || displayFramebufferHeight != mode.getHeight();
 
             if (glCtxEnabled) {
                 SDL_GL_SetSwapInterval(1);
