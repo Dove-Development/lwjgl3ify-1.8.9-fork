@@ -429,10 +429,27 @@ public class Display {
                 Lwjgl3ify.LOG.info("Window got input without keyboard focus; asking for it");
             }
             SDL_RaiseWindow(sdlWindow);
+            // On macOS the window can already be the key window while SDL missed it becoming so; then
+            // raising sends nothing and SDL keeps no key state (the player cannot move). Hiding and
+            // showing it makes macOS announce it again, as Cmd+Tab does. At most every 2 seconds.
+            final long now = System.nanoTime();
+            final long flags = SDL_GetWindowFlags(sdlWindow);
+            if ((flags & SDL_WINDOW_INPUT_FOCUS) == 0 && (flags & SDL_WINDOW_FULLSCREEN) == 0
+                && now - lastFocusCycle > 2_000_000_000L) {
+                lastFocusCycle = now;
+                Lwjgl3ify.LOG.info("Still no keyboard focus; hiding and showing the window to get it");
+                SDL_HideWindow(sdlWindow);
+                SDL_ShowWindow(sdlWindow);
+                SDL_RaiseWindow(sdlWindow);
+                Lwjgl3ify.LOG.info(
+                    "Keyboard focus after showing the window again: {}",
+                    (SDL_GetWindowFlags(sdlWindow) & SDL_WINDOW_INPUT_FOCUS) != 0);
+            }
         }
     }
 
     private static boolean askedForFocus = false;
+    private static long lastFocusCycle = System.nanoTime() - 3_000_000_000L;
 
     public static boolean isVisible() {
         return displayVisible;
