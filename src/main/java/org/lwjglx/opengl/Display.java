@@ -394,14 +394,28 @@ public class Display {
      * Game". Call on the main thread.
      */
     public static synchronized void lwjgl3ify$syncFocus() {
-        if (!displayCreated || sdlWindow == 0L) {
+        // Only ever turns focus on: losing it is left to SDL's focus-lost event, so a click that
+        // focused the window (below) is not undone by an SDL that still reports it unfocused.
+        if (displayFocused || !displayCreated || sdlWindow == 0L) {
             return;
         }
-        final boolean focused = (SDL_GetWindowFlags(sdlWindow) & SDL_WINDOW_INPUT_FOCUS) != 0;
-        if (focused != displayFocused) {
-            Lwjgl3ify.LOG.info("Window focus was out of date ({} instead of {}); corrected", displayFocused, focused);
-            displayFocused = focused;
+        if ((SDL_GetWindowFlags(sdlWindow) & SDL_WINDOW_INPUT_FOCUS) != 0) {
+            Lwjgl3ify.LOG.info("Window focus was out of date (unfocused, SDL says focused); corrected");
+            displayFocused = true;
         }
+    }
+
+    /**
+     * A click or key press in the game window: the player is using it, so it counts as focused even
+     * when no focus event came (seen on macOS, where 1.8.9 then pauses as the world loads and "Back
+     * to Game" does nothing). Call on the main thread, for events of this window only.
+     */
+    public static synchronized void lwjgl3ify$inputReceived(int windowId) {
+        if (displayFocused || !displayCreated || windowId != sdlWindowId) {
+            return;
+        }
+        Lwjgl3ify.LOG.info("Window focus was out of date (unfocused, but got input); corrected");
+        displayFocused = true;
     }
 
     public static boolean isVisible() {

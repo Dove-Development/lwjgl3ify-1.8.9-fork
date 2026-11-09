@@ -83,6 +83,9 @@ public class Lwjgl3ifyEventLoop {
                                 mouseButtonEvent.x(),
                                 mouseButtonEvent.y());
                         }
+                        if (event.type() == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+                            Display.lwjgl3ify$inputReceived(mouseButtonEvent.windowID());
+                        }
                         Mouse.addButtonEvent(
                             Mouse.sdlToLwjglMouseButton(mouseButtonEvent.button()),
                             event.type() == SDL_EVENT_MOUSE_BUTTON_DOWN);
@@ -99,6 +102,9 @@ public class Lwjgl3ifyEventLoop {
                         Keyboard.populateKeyLookupTables();
                     }
                     case SDL_EVENT_KEY_DOWN, SDL_EVENT_KEY_UP -> {
+                        if (event.type() == SDL_EVENT_KEY_DOWN) {
+                            Display.lwjgl3ify$inputReceived(keyEvent.windowID());
+                        }
                         handleKeyEvent();
                     }
                     case SDL_EVENT_TEXT_INPUT -> {
