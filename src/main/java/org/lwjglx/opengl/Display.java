@@ -273,6 +273,9 @@ public class Display {
                     savedIcons = null;
                 }
                 Sys.checkSdl(SDL_ShowWindow(sdlWindow));
+                // A game started by a launcher is not always made the active app on macOS, and then
+                // its window gets no keyboard state or mouse capture. Ask for it; failing is harmless.
+                SDL_RaiseWindow(sdlWindow);
 
                 if (glCtxEnabled) {
                     Sys.checkSdl(SDL_GL_MakeCurrent(sdlWindow, NULL));
@@ -411,12 +414,25 @@ public class Display {
      * to Game" does nothing). Call on the main thread, for events of this window only.
      */
     public static synchronized void lwjgl3ify$inputReceived(int windowId) {
-        if (displayFocused || !displayCreated || windowId != sdlWindowId) {
+        if (!displayCreated || windowId != sdlWindowId) {
             return;
         }
-        Lwjgl3ify.LOG.info("Window focus was out of date (unfocused, but got input); corrected");
-        displayFocused = true;
+        if (!displayFocused) {
+            Lwjgl3ify.LOG.info("Window focus was out of date (unfocused, but got input); corrected");
+            displayFocused = true;
+        }
+        // The player is using the window but macOS has not made it the active window: without that
+        // SDL keeps no key state (no movement) and cannot capture the mouse (no looking around).
+        if ((SDL_GetWindowFlags(sdlWindow) & SDL_WINDOW_INPUT_FOCUS) == 0) {
+            if (!askedForFocus) {
+                askedForFocus = true;
+                Lwjgl3ify.LOG.info("Window got input without keyboard focus; asking for it");
+            }
+            SDL_RaiseWindow(sdlWindow);
+        }
     }
+
+    private static boolean askedForFocus = false;
 
     public static boolean isVisible() {
         return displayVisible;
