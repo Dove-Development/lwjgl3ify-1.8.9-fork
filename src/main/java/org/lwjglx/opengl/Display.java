@@ -387,6 +387,23 @@ public class Display {
         return displayFocused;
     }
 
+    /**
+     * Reads the window's focus from SDL itself, after the events of a frame. Focus otherwise only
+     * follows SDL's focus events, and when one is missed (seen on macOS) the game believes it is not
+     * focused until the next one, so Minecraft 1.8.9 keeps its pause screen up and ignores "Back to
+     * Game". Call on the main thread.
+     */
+    public static synchronized void lwjgl3ify$syncFocus() {
+        if (!displayCreated || sdlWindow == 0L) {
+            return;
+        }
+        final boolean focused = (SDL_GetWindowFlags(sdlWindow) & SDL_WINDOW_INPUT_FOCUS) != 0;
+        if (focused != displayFocused) {
+            Lwjgl3ify.LOG.info("Window focus was out of date ({} instead of {}); corrected", displayFocused, focused);
+            displayFocused = focused;
+        }
+    }
+
     public static boolean isVisible() {
         return displayVisible;
     }

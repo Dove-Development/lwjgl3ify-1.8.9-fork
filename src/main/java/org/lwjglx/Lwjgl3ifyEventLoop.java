@@ -109,6 +109,7 @@ public class Lwjgl3ifyEventLoop {
             }
         }
         Mouse.sdlMouseButtonFlags = nSDL_GetMouseState(0, 0);
+        Display.lwjgl3ify$syncFocus();
     }
 
     private static char rawKeyCodeToChar(int rawKeyCode) {
