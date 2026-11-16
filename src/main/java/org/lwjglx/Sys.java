@@ -72,6 +72,11 @@ public class Sys {
 
             if (currentPlatform == Platform.LINUX) {
                 SDL_SetHint(SDL_HINT_VIDEO_FORCE_EGL, "1");
+                // ChromeOS's Linux gives SDL's mouse capture none of the input extensions it needs; on X11 the
+                // pointer can be moved back to the window's centre instead, as LWJGL 2 does (see Mouse).
+                if (isChromeOsLinux() && System.getenv("SDL_VIDEO_DRIVER") == null) {
+                    SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "x11");
+                }
             }
 
             if (!SDL_Init(
@@ -95,6 +100,11 @@ public class Sys {
             }
             SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
         });
+    }
+
+    /** ChromeOS's Linux (Crostini), which ships its integration in this folder. */
+    public static boolean isChromeOsLinux() {
+        return Files.isDirectory(FileSystems.getDefault().getPath("/opt/google/cros-containers"));
     }
 
     private static void createLinuxDesktopEntry() throws IOException {

@@ -1,5 +1,6 @@
 package org.lwjglx.input;
 
+import static org.lwjgl.sdl.SDLError.SDL_GetError;
 import static org.lwjgl.sdl.SDLMouse.*;
 
 import java.nio.ByteBuffer;
@@ -13,6 +14,7 @@ import org.lwjgl.system.MemoryStack;
 import org.lwjglx.Sys;
 import org.lwjglx.opengl.Display;
 
+import me.eigenraven.lwjgl3ify.Lwjgl3ify;
 import me.eigenraven.lwjgl3ify.api.FloatMouseHelper;
 import me.eigenraven.lwjgl3ify.client.MainThreadExec;
 import me.eigenraven.lwjgl3ify.core.Config;
@@ -56,6 +58,14 @@ public class Mouse {
     private static int ignoreNextDelta = 0;
     private static int ignoreNextMove = 0;
 
+    /**
+     * SDL could not capture the mouse (its relative mode needs input extensions some systems lack, such as ChromeOS's
+     * Linux), so it is captured as LWJGL 2 does: the pointer hidden and kept in the window, every move measured from the
+     * window's centre and the pointer put back there. Only on X11, where a program may move the pointer.
+     */
+    private static boolean warpCapture = false;
+    private static boolean warpCaptureLogged = false;
+
     public static int sdlToLwjglMouseButton(byte sdlMouseButton) {
         return switch (sdlMouseButton) {
             case SDL_BUTTON_LEFT -> 0;
@@ -86,14 +96,26 @@ public class Mouse {
             ignoreNextMove--;
             return;
         }
+        float xrel = event.xrel();
+        float yrel = event.yrel();
+        if (warpCapture && grabbed) {
+            final float[] centre = windowCentre();
+            xrel = event.x() - centre[0];
+            yrel = event.y() - centre[1];
+            if (Math.abs(xrel) < 0.5f && Math.abs(yrel) < 0.5f) {
+                // The pointer arriving back at the centre.
+                return;
+            }
+            SDL_WarpMouseInWindow(Display.getWindow(), centre[0], centre[1]);
+        }
         float scale = Display.getPixelScaleFactor();
         final float mouseX = event.x() * scale;
         final float mouseY = event.y() * scale;
         // convert from screen-space coordinates to framebuffer coordinates
-        dxFloat += event.xrel() * scale;
-        dyFloat -= event.yrel() * scale;
-        dxAccum += event.xrel() * scale;
-        dyAccum -= event.yrel() * scale;
+        dxFloat += xrel * scale;
+        dyFloat -= yrel * scale;
+        dxAccum += xrel * scale;
+        dyAccum -= yrel * scale;
         final int wholeDx = Math.round(dxAccum), wholeDy = Math.round(dyAccum);
         dxAccum -= wholeDx;
         dyAccum -= wholeDy;
@@ -241,7 +263,15 @@ public class Mouse {
                 if (!grab) {
                     SDL_WarpMouseInWindow(Display.getWindow(), w.get(0) / 2.0f, h.get(0) / 2.0f);
                 }
-                SDL_SetWindowRelativeMouseMode(Display.getWindow(), grab);
+                if (!grab && warpCapture) {
+                    stopWarpCapture();
+                }
+                if (grab && Sys.isChromeOsLinux()) {
+                    // SDL's capture can report success there and still get no movement.
+                    startWarpCapture(w.get(0) / 2.0f, h.get(0) / 2.0f);
+                } else if (!SDL_SetWindowRelativeMouseMode(Display.getWindow(), grab) && grab) {
+                    startWarpCapture(w.get(0) / 2.0f, h.get(0) / 2.0f);
+                }
                 if (!grab) {
                     SDL_WarpMouseInWindow(Display.getWindow(), w.get(0) / 2.0f, h.get(0) / 2.0f);
                 } else if (MainThreadExec.IS_MACOS) {
@@ -261,6 +291,46 @@ public class Mouse {
             }
         });
         grabbed = grab;
+    }
+
+    /** Main thread. */
+    private static void startWarpCapture(float centreX, float centreY) {
+        final String error = SDL_GetError();
+        final String driver = SDLVideo.SDL_GetCurrentVideoDriver();
+        if (!"x11".equals(driver)) {
+            if (!warpCaptureLogged) {
+                warpCaptureLogged = true;
+                Lwjgl3ify.LOG.warn("SDL cannot capture the mouse ({}) on the {} video driver", error, driver);
+            }
+            return;
+        }
+        if (!warpCaptureLogged) {
+            warpCaptureLogged = true;
+            Lwjgl3ify.LOG.info(
+                "SDL cannot capture the mouse ({}); capturing it by putting the pointer back in the window's centre, as LWJGL 2 does",
+                error);
+        }
+        warpCapture = true;
+        SDL_HideCursor();
+        SDLVideo.SDL_SetWindowMouseGrab(Display.getWindow(), true);
+        SDL_WarpMouseInWindow(Display.getWindow(), centreX, centreY);
+    }
+
+    /** Main thread. */
+    private static void stopWarpCapture() {
+        warpCapture = false;
+        SDLVideo.SDL_SetWindowMouseGrab(Display.getWindow(), false);
+        SDL_ShowCursor();
+    }
+
+    /** The window's centre in window coordinates. Main thread. */
+    private static float[] windowCentre() {
+        try (final MemoryStack ms = MemoryStack.stackPush()) {
+            final IntBuffer w = ms.ints(0);
+            final IntBuffer h = ms.ints(0);
+            SDLVideo.SDL_GetWindowSize(Display.getWindow(), w, h);
+            return new float[] { w.get(0) / 2.0f, h.get(0) / 2.0f };
+        }
     }
 
     public static boolean isGrabbed() {
